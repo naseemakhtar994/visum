@@ -1,28 +1,9 @@
-/*
- * Copyright (c) 2015  Zvooq LTD.
- * Authors: Renat Sarymsakov, Dmitriy Mozgin, Denis Volyntsev.
- *
- * This file is part of Visum.
- *
- * Visum is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Visum is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Visum.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package io.reist.visum.view;
 
+import android.accounts.AccountAuthenticatorActivity;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.LayoutRes;
-import android.support.v7.app.AppCompatActivity;
 
 import butterknife.ButterKnife;
 import io.reist.visum.ComponentCache;
@@ -30,9 +11,13 @@ import io.reist.visum.ComponentCacheProvider;
 import io.reist.visum.presenter.VisumPresenter;
 
 /**
- * Created by Defuera on 29/01/16.
+ * Created by defuera on 01/02/2016.
+ * If you need implement AccountAuthenticatorActivity and still want to get Visum benefits,
+ * here you go.
  */
-public abstract class VisumActivity<P extends VisumPresenter> extends AppCompatActivity implements VisumView<P>, VisumClient {
+public abstract class VisumAccountAuthenticatorActivity<P extends VisumPresenter>
+        extends AccountAuthenticatorActivity
+        implements VisumView<P>, VisumClient {
 
     private static final String ARG_STATE_COMPONENT_ID = "ARG_STATE_COMPONENT_ID";
 
@@ -48,7 +33,6 @@ public abstract class VisumActivity<P extends VisumPresenter> extends AppCompatA
 
         setContentView(getLayoutRes());
         ButterKnife.bind(this);
-
         attachPresenter();
     }
 
@@ -66,11 +50,31 @@ public abstract class VisumActivity<P extends VisumPresenter> extends AppCompatA
         detachPresenter();
     }
 
-
     private ComponentCache getComponentCache() {
         ComponentCacheProvider application = (ComponentCacheProvider) getApplicationContext();
         return application.getComponentCache();
     }
+
+
+    //region VisumView
+
+    @SuppressWarnings("unchecked") //todo setView should be checked call
+    @Override
+    public void attachPresenter() {
+        final P presenter = getPresenter();
+        if (presenter != null) {
+            presenter.setView(this);
+        }
+    }
+
+    @SuppressWarnings("unchecked") //todo setView should be type safe call
+    @Override
+    public void detachPresenter() {
+        if (getPresenter() != null)
+            getPresenter().setView(null);
+    }
+
+    //endregion
 
     //region VisumClient
 
@@ -95,30 +99,10 @@ public abstract class VisumActivity<P extends VisumPresenter> extends AppCompatA
 
     //endregion
 
-    //region VisumView
-
-    @SuppressWarnings("unchecked") //todo setView should be checked call
-    @Override
-    public void attachPresenter() {
-        final P presenter = getPresenter();
-        if (presenter != null) {
-            presenter.setView(this);
-        }
-    }
-
-    @SuppressWarnings("unchecked") //todo setView should be type safe call
-    @Override
-    public void detachPresenter() {
-        if (getPresenter() != null)
-            getPresenter().setView(null);
-    }
-
-    //endregion
-
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
 
         stateSaved = true;
 
@@ -137,5 +121,4 @@ public abstract class VisumActivity<P extends VisumPresenter> extends AppCompatA
 
         stateSaved = false;
     }
-
 }

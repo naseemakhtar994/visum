@@ -20,20 +20,18 @@
 
 package io.reist.visum.view;
 
-import android.content.Context;
-import android.os.Bundle;
+import io.reist.visum.presenter.VisumPresenter;
 
 /**
  * Created by Reist on 10/15/15.
+ * Interface that enforces you to handle presenter lifecycle for your View (it terms of MVP)
  */
-public interface VisumView {
+public interface VisumView<P extends VisumPresenter> {
 
-    Context context();
+    P getPresenter();
 
-    Long getComponentId();
+    void attachPresenter();
 
-    void setComponentId(Long componentId);
-
-    Object getComponent();
+    void detachPresenter();
 
 }
